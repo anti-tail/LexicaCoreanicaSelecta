@@ -1,4 +1,4 @@
-/* Lexica Koreanicarum — 中期・近世朝鮮語の静的検索（データは data/ の JSON） */
+/* Lexica Coreanica — 中期・近世朝鮮語の静的検索（データは data/ の JSON） */
 (() => {
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const esc = s => (s ?? '').toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -45,7 +45,7 @@
   const VNAME = TX.vname;
   // 英語版は en/ にあり，データは 1 つ上（<meta name="lexica-base" content="../">）．一覧の行の訳は日本語 3 番目，英語 9 番目
   const BASE = document.querySelector('meta[name="lexica-base"]')?.content || '';
-  const REPO = document.querySelector('meta[name="lexica-repo"]')?.content || 'https://github.com/anti-tail/LexicaCoreanicarumSelecta';
+  const REPO = document.querySelector('meta[name="lexica-repo"]')?.content || 'https://github.com/anti-tail/LexicaCoreanicaSelecta';
   const TRI = LANG === 'en' ? 9 : 3, TRSEP = LANG === 'en' ? '; ' : '；';
   const VCLS = { LMK15: 'L', LMK16: 'L', OLD: 'O', EMK17: 'E', EMK18: 'E', EMK19: 'E' };
   const vtag = v => `<span class="tag v-${VCLS[v] || ''}">${esc(VNAME[v] || v)}</span>`;

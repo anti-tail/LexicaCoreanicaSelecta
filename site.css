@@ -1,4 +1,4 @@
-/* Lexica Koreanicarum Selecta — 中期朝鮮語検索（静的サイト）．本体 UI と同じ色と書体 */
+/* Lexica Coreanica Selecta — 中期朝鮮語検索（静的サイト）．本体 UI と同じ色と書体 */
 /* 옛한글 を合成表示できる書体（Noto Serif CJK KR の部分集合）．ハングルの範囲だけに使う．
    옛한글 を含む要素には必ず .hangul（または --font-hangul）を付ける：iOS では system 書体に落ちると字母が音節にまとまらない */
 @font-face {

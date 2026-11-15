@@ -1,4 +1,4 @@
-# 日本語で中期朝鮮語を引く — Lexica Koreanicarum Selecta
+# 日本語で中期朝鮮語を引く — Lexica Coreanica Selecta
 
 **English:** Middle Korean in English is at [`en/`](en/) (same data, English interface and English translations). Corrections: [CONTRIBUTING.md](CONTRIBUTING.md#english).
 
@@ -14,4 +14,4 @@
 - データは 우리말샘 の歴史情報（国立国語院）と 한국어기초사전 の日本語対訳（国立国語院）から作っています．
   どちらも CC BY-SA 2.0 KR です．詳しくは [LICENSE.md](LICENSE.md)．
 
-このリポジトリはサイトの書き出し結果です．元のプログラムは Lexica Koreanicarum（非公開）の `tools/export_site.py` です．
+このリポジトリはサイトの書き出し結果です．元のプログラムは Lexica Coreanica（非公開）の `tools/export_site.py` です．
