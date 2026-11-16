@@ -4,10 +4,11 @@ The data on this site are made from the following resources, both published by t
 
 | Resource | Parts used | Provider |
 | --- | --- | --- |
-| 우리말샘 | Headwords and definitions; historical data (forms by century, citations, sources); dialect forms and regions | National Institute of Korean Language <https://opendict.korean.go.kr/> |
+| 우리말샘 | Headwords and definitions; historical data (forms by century, citations, sources); dialect entries (forms, regions, definitions and the modern entries they are linked to) | National Institute of Korean Language <https://opendict.korean.go.kr/> |
 | 한국어기초사전 | English equivalents (headword translations and translated definitions) | National Institute of Korean Language <https://krdict.korean.go.kr/> |
 
 - The outline of the dialect map is simplified from Natural Earth (public domain, <https://www.naturalearthdata.com/>). The representative points of the regions were set by the Lexica Coreanica project and are not in the original resources.
+- The dialect “word groups” (dialect entries linked to the same modern entry; unlinked entries grouped by identical definition and part of speech) and the English names of the regions were made by the Lexica Coreanica project and are not in the original resources.
 - Segmentation and the Yale romanization (for reference) were produced mechanically by the Lexica Coreanica programs and are not in the original resources.
 - The data of this site (`data/`) are also provided under CC BY-SA 2.0 KR (ShareAlike). Please credit the sources above when you use them.
   Full licence: <https://creativecommons.org/licenses/by-sa/2.0/kr/>

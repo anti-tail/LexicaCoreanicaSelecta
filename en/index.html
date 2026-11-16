@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Middle Korean in English — Lexica Coreanica Selecta</title>
-<meta name="description" content="Search 15th–19th century Korean forms and citations from the historical data of 우리말샘, in English.">
+<title>Middle Korean and Korean Dialects in English — Lexica Coreanica Selecta</title>
+<meta name="description" content="Search 15th–19th century Korean forms and citations, and modern dialect forms, from the historical data and dialect entries of 우리말샘, in English.">
 <link rel="preload" href="../fonts/hangul.woff" as="font" type="font/woff" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,10 +17,14 @@
 <body>
 <header class="top">
   <div class="wrap top-row">
-    <div class="mark"><span class="mark-title">Lexica Coreanica <span class="mark-selecta">Selecta</span></span><span class="mark-sub">Middle Korean in English</span></div>
+    <div class="mark"><span class="mark-title">Lexica Coreanica <span class="mark-selecta">Selecta</span></span><span class="mark-sub">Middle Korean and dialects in English</span></div>
     <span class="top-links"><a href="../" hreflang="ja" lang="ja">日本語</a><button type="button" class="link-btn" id="theme">Dark theme</button></span>
   </div>
   <div class="wrap">
+    <nav class="tabs" role="tablist" aria-label="What to search">
+      <button type="button" role="tab" data-tab="h" aria-selected="true">Middle &amp; Early Modern<span class="tab-sub">15th–19th c.</span></button>
+      <button type="button" role="tab" data-tab="d" aria-selected="false">Dialects<span class="tab-sub">maps · same meaning</span></button>
+    </nav>
     <form id="f" class="query" autocomplete="off" role="search">
       <input id="q" class="field big" type="search" placeholder="ᄆᆞᅀᆞᆷ　마음　mozom　heart" aria-label="Word to search" autofocus>
       <button class="btn" type="submit">Search</button>
@@ -36,7 +40,7 @@
       <button type="button" data-ins="ㆅ" title="ssang-hieut">ㆅ</button><button type="button" data-ins="ㆎ" title="ㆍ+ㅣ">ㆎ</button>
       <span class="hint">Typing ㅁ ㆍ ㅿ ㆍ ㅁ gives <span class="hangul">ᄆᆞᅀᆞᆷ</span>. Tone dots are ignored. The “<span class="hangul">한</span>” button beside the search box opens a 2-set (두벌식) keyboard.</span>
     </div>
-    <div class="stages" role="group" aria-label="Filter by period">
+    <div class="stages h-only" role="group" aria-label="Filter by period">
       <span class="label">Period</span>
       <label><input type="checkbox" value="0" checked> 15th c.</label>
       <label><input type="checkbox" value="1" checked> 16th c.</label>
@@ -48,6 +52,31 @@
       <select id="mode" class="mode" aria-label="How to match forms">
         <option value="era" selected>Allow each century’s spelling variation</option>
         <option value="syl">Ignore syllable division only</option>
+        <option value="exact">Exact spelling</option>
+      </select>
+    </div>
+    <div class="dctl d-only" role="group" aria-label="Filter by region">
+      <span class="label">Regions</span><span id="rchips" class="chips"></span>
+      <button type="button" class="link-btn" id="rpick">Choose on the map</button>
+      <button type="button" class="link-btn" id="rclear" hidden>Back to all regions</button>
+      <span id="rinfo" class="faint"></span>
+    </div>
+    <div class="dctl d-only" role="group" aria-label="How to search dialects">
+      <span class="label">Region condition</span>
+      <select id="drm" class="mode" aria-label="Region condition">
+        <option value="any" selected>Forms found in any chosen region</option>
+        <option value="all">Forms found in every chosen region</option>
+        <option value="only">Forms found only in the chosen regions</option>
+      </select>
+      <span class="label sep">Search in</span>
+      <select id="dtarget" class="mode" aria-label="Search in">
+        <option value="auto" selected>Dialect forms and modern headwords</option>
+        <option value="form">Dialect forms only</option>
+        <option value="std">Modern headwords and definitions only</option>
+      </select>
+      <span class="label sep">Matching</span>
+      <select id="dmode" class="mode" aria-label="How to match forms">
+        <option value="syl" selected>Ignore syllable division</option>
         <option value="exact">Exact spelling</option>
       </select>
     </div>
@@ -67,6 +96,7 @@
       </ul>
       <p class="muted">With “Allow each century’s spelling variation”, letters and spellings that had already merged in the century of a form are treated as the same: for forms from the 17th century on, ㅿ is ignored and ㅴ・ㅺ・ㄲ are not distinguished; from the 18th century on, ㆍ and ㅏ in the first syllable, and <span class="hangul">디</span> and <span class="hangul">지</span>, are not distinguished (rules after Lee &amp; Ramsey 2011, ch. 6). Untick periods to search only the forms of those centuries.</p>
       <p class="muted">Select any Korean word on the page (including words inside citations) and press “EN” to look it up as a Middle/Early Modern form and as modern Korean in English.</p>
+      <p class="muted">Switch to “Dialects” above to search modern dialect forms by form, by meaning (English translation or modern headword), or by region on a map. Opening a word group shows the forms of the same meaning in other regions on a map and in a table: <a class="hangul" href="#t=d&amp;q=부엌">부엌</a>, <a href="#t=d&amp;q=corn">corn</a>, <a href="#t=d&amp;r=JJ">words of Jeju</a>.</p>
       <p class="muted">Forms, citations and sources come from the historical data of <span class="hangul">우리말샘</span>; English translations from <span class="hangul">한국어기초사전</span> (both National Institute of Korean Language, CC BY-SA 2.0 KR). See <a href="LICENSE.md">LICENSE.md</a>.</p>
     </div>
   </section>

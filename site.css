@@ -137,3 +137,45 @@ mark { background: var(--ochre); color: var(--ochre-ink); padding: 0 2px; border
 .report { font-size: 12px; }
 .tag.fixed { background: var(--celadon-soft); color: var(--celadon); border-color: transparent; }
 tr.hidden-form td { opacity: .45; text-decoration: line-through; }
+
+/* 歴史形／方言のタブ */
+.tabs { display: flex; gap: 2px; margin-bottom: 8px; border-bottom: 1px solid var(--rule); }
+.tabs button { font: inherit; font-size: 14px; font-weight: 600; color: var(--muted); background: none; border: 0; border-bottom: 2px solid transparent; padding: 4px 12px 6px; margin-bottom: -1px; cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--indigo); border-bottom-color: var(--indigo); }
+.tabs .tab-sub { font-weight: 400; font-size: 11.5px; color: var(--faint); margin-left: 6px; }
+body[data-tab="d"] .h-only { display: none; }
+body:not([data-tab="d"]) .d-only { display: none; }
+/* 方言の検索 */
+.dctl { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; margin-top: 8px; font-size: 13px; }
+.chips { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.chip { font: inherit; font-size: 12.5px; height: 26px; padding: 0 9px; border: 1px solid var(--rule-strong); border-radius: 13px; background: var(--surface); color: var(--ink); cursor: pointer; }
+.chip:hover { border-color: var(--indigo); color: var(--indigo); }
+.chip.on { background: var(--indigo); border-color: var(--indigo); color: var(--surface); }
+.chip.part { background: var(--indigo-soft); border-color: var(--indigo); color: var(--indigo); }
+.item-dforms { display: flex; flex-wrap: wrap; gap: 2px 12px; margin-top: 2px; }
+.dform { display: inline-flex; gap: 4px; align-items: baseline; }
+.dform .hangul { font-size: 16px; color: var(--plum); }
+.dform .rg, .rgcell { font-size: 11.5px; color: var(--faint); white-space: nowrap; }
+.rgcell { font-size: 12.5px; color: var(--muted); width: 8em; }
+.list .more { padding: 10px 14px; text-align: center; list-style: none; }
+.dleg li.hit .dl-form { background: var(--ochre); color: var(--ochre-ink); border-radius: 2px; padding: 0 2px; }
+a.hitf { background: var(--ochre); color: var(--ochre-ink); border-radius: 2px; padding: 0 2px; }
+.dmap-more { font-size: 13px; margin: 8px 0 0; }
+.rel { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+.rel li { padding: 3px 0; border-bottom: 1px solid var(--rule); }
+.rel a.hangul { font-size: 16px; margin-right: 4px; }
+.pick { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-start; }
+.pick-svg { width: 300px; max-width: 100%; height: auto; flex: none; border: 1px solid var(--rule); border-radius: 6px; }
+.pick-side { flex: 1; min-width: 220px; }
+.pk-prov { fill: var(--surface); stroke: var(--rule-strong); stroke-width: .7; cursor: pointer; transition: fill .12s; }
+.pk-prov:hover { fill: var(--indigo-soft); }
+.pk-prov.on { fill: var(--indigo); }
+.pk-pt { cursor: pointer; }
+.pk-pt circle { fill: var(--surface); stroke: var(--indigo); stroke-width: 1.5; }
+.pk-pt.on circle { fill: var(--indigo); }
+.pk-pt text { font: 10px var(--font-ui); fill: var(--muted); pointer-events: none; }
+.pk-pt:hover circle { fill: var(--indigo-soft); }
+.tips { padding-left: 18px; margin: 0; }
+.tips li { margin: 3px 0; }
+.dform .hangul { white-space: nowrap; }
+.dform .rg { white-space: normal; }

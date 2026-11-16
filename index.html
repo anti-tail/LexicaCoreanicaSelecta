@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>日本語で中期朝鮮語を引く — Lexica Coreanica Selecta</title>
-<meta name="description" content="우리말샘（国立国語院）の歴史情報から，15–19 世紀の朝鮮語の形と用例を引く検索ページ．">
+<title>日本語で中期朝鮮語・方言を引く — Lexica Coreanica Selecta</title>
+<meta name="description" content="우리말샘（国立国語院）の歴史情報と方言項目から，15–19 世紀の朝鮮語の形と用例，現代の方言形を引く検索ページ．">
 <link rel="preload" href="fonts/hangul.woff" as="font" type="font/woff" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,10 +15,14 @@
 <body>
 <header class="top">
   <div class="wrap top-row">
-    <div class="mark"><span class="mark-title">Lexica Coreanica <span class="mark-selecta">Selecta</span></span><span class="mark-sub">日本語で中期朝鮮語を引く</span></div>
+    <div class="mark"><span class="mark-title">Lexica Coreanica <span class="mark-selecta">Selecta</span></span><span class="mark-sub">日本語で中期朝鮮語・方言を引く</span></div>
     <span class="top-links"><a href="en/" hreflang="en" lang="en">English</a><button type="button" class="link-btn" id="theme">暗い表示にする</button></span>
   </div>
   <div class="wrap">
+    <nav class="tabs" role="tablist" aria-label="引く資料">
+      <button type="button" role="tab" data-tab="h" aria-selected="true">中期・近世の形<span class="tab-sub">15–19 世紀</span></button>
+      <button type="button" role="tab" data-tab="d" aria-selected="false">方言<span class="tab-sub">地図・同じ意味の形</span></button>
+    </nav>
     <form id="f" class="query" autocomplete="off" role="search">
       <input id="q" class="field big" type="search" placeholder="ᄆᆞᅀᆞᆷ　마음　mozom　こころ" aria-label="語を入れる" autofocus>
       <button class="btn" type="submit">引く</button>
@@ -34,7 +38,7 @@
       <button type="button" data-ins="ㆅ" title="쌍히읗">ㆅ</button><button type="button" data-ins="ㆎ" title="ㆍ+ㅣ">ㆎ</button>
       <span class="hint">ㅁ ㆍ ㅿ ㆍ ㅁ と順に入れると <span class="hangul">ᄆᆞᅀᆞᆷ</span> にまとまります．傍点は無視して探します．検索欄の横の「<span class="hangul">한</span>」で두벌식のキーボードを出せます．</span>
     </div>
-    <div class="stages" role="group" aria-label="時代で絞る">
+    <div class="stages h-only" role="group" aria-label="時代で絞る">
       <span class="label">時代</span>
       <label><input type="checkbox" value="0" checked> 15 世紀</label>
       <label><input type="checkbox" value="1" checked> 16 世紀</label>
@@ -46,6 +50,31 @@
       <select id="mode" class="mode" aria-label="照合のしかた">
         <option value="era" selected>時代ごとの綴りの揺れを吸収</option>
         <option value="syl">音節の組み方だけ吸収</option>
+        <option value="exact">表記どおり</option>
+      </select>
+    </div>
+    <div class="dctl d-only" role="group" aria-label="地域で絞る">
+      <span class="label">地域</span><span id="rchips" class="chips"></span>
+      <button type="button" class="link-btn" id="rpick">地図で選ぶ</button>
+      <button type="button" class="link-btn" id="rclear" hidden>すべての地域に戻す</button>
+      <span id="rinfo" class="faint"></span>
+    </div>
+    <div class="dctl d-only" role="group" aria-label="方言の引き方">
+      <span class="label">地域の条件</span>
+      <select id="drm" class="mode" aria-label="地域の条件">
+        <option value="any" selected>選んだ地域のどれかに出る形</option>
+        <option value="all">選んだ地域のすべてに出る形</option>
+        <option value="only">選んだ地域にだけ出る形</option>
+      </select>
+      <span class="label sep">引く対象</span>
+      <select id="dtarget" class="mode" aria-label="引く対象">
+        <option value="auto" selected>方言形と現代語の見出し</option>
+        <option value="form">方言形だけ</option>
+        <option value="std">現代語の見出しと語釈だけ</option>
+      </select>
+      <span class="label sep">照合</span>
+      <select id="dmode" class="mode" aria-label="照合のしかた">
+        <option value="syl" selected>音節の組み方を吸収</option>
         <option value="exact">表記どおり</option>
       </select>
     </div>
@@ -65,6 +94,7 @@
       </ul>
       <p class="muted">「照合」が「時代ごとの綴りの揺れを吸収」のときは，形の属する世紀ですでに区別されなくなった字母や綴りを同じものとみなします．たとえば 17 世紀以降の形では ㅿ を無視し，ㅴ・ㅺ・ㄲ を区別せず，18 世紀以降の形では第 1 音節の ㆍ と ㅏ，<span class="hangul">디</span> と <span class="hangul">지</span> を区別しません（規則は Lee &amp; Ramsey 2011 の 6 章による）．時代のチェックを細かく外すと，その世紀の形だけで探せます．</p>
       <p class="muted">ページ上の語（用例の中の語も）を選ぶと「訳」ボタンが出て，日本語訳を引けます．</p>
+      <p class="muted">上の「方言」に切り替えると，現代の方言形を形・意味（日本語訳・現代語の見出し）・地図の地域で引けます．語群を開くと，同じ意味の別の地域の形が地図と表で並びます：<a class="hangul" href="#t=d&amp;q=부엌">부엌</a>，<a href="#t=d&amp;q=とうもろこし">とうもろこし</a>，<a href="#t=d&amp;r=JJ">済州の語</a>．</p>
       <p class="muted">形・用例・出典は <span class="hangul">우리말샘</span>（国立国語院）の歴史情報，日本語訳は <span class="hangul">한국어기초사전</span>（国立国語院）の対訳です．どちらも CC BY-SA 2.0 KR．詳しくは <a href="LICENSE.md">LICENSE.md</a>．</p>
     </div>
   </section>

@@ -4,10 +4,11 @@
 
 | 資料 | 使った部分 | 提供元 |
 | --- | --- | --- |
-| 우리말샘 | 見出し・語釈，歴史情報（世紀別の形・用例・出典），方言形と地域 | 国立国語院 <https://opendict.korean.go.kr/> |
-| 한국어기초사전 | 日本語の対訳（見出し語訳） | 国立国語院 <https://krdict.korean.go.kr/> |
+| 우리말샘 | 見出し・語釈，歴史情報（世紀別の形・用例・出典），方言項目（形・地域・語釈と，結ばれた現代語の項目） | 国立国語院 <https://opendict.korean.go.kr/> |
+| 한국어기초사전 | 日本語・英語の対訳（見出し語訳） | 国立国語院 <https://krdict.korean.go.kr/> |
 
 - 方言地図の輪郭は Natural Earth（パブリックドメイン，<https://www.naturalearthdata.com/>）を簡略化したもの．地域の代表地点は Lexica Coreanica で定めたもので，原資料にはありません．
+- 方言の「語群」（同じ現代語に結ばれた方言項目のまとまり．結ばれていない項目は語釈と品詞の同じもの）と，地域名の日本語・英語の表記は Lexica Coreanica でまとめたもので，原資料にはありません．
 - 表記の分節化と Yale 綴り（参考）は Lexica Coreanica のプログラムで機械的に作ったもので，原資料にはありません．
 - このサイトのデータ（`data/`）も CC BY-SA 2.0 KR で提供します（同一条件許諾）．利用するときは上の出典を表示してください．
   許諾の全文：<https://creativecommons.org/licenses/by-sa/2.0/kr/>

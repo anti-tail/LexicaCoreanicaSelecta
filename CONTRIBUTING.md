@@ -4,8 +4,9 @@
 
 ## 日本語
 
-このサイトの日本語訳・英語訳は，中期・近世朝鮮語の項目（우리말샘 の歴史情報）に，同じ現代語の見出しを持つ 한국어기초사전 の対訳を機械的に結びつけたものです．
+このサイトの日本語訳・英語訳は，中期・近世朝鮮語の項目（우리말샘 の歴史情報）に，同じ現代語の見出しを持つ 한국어기초사전 の対訳（品詞の同じ語義があればその訳だけ）を機械的に結びつけたものです．
 同じ見出しの別の意味の訳が付いていたり，項目に別の語の形が入っていたりすることがあります．
+方言の検索の語群も，結ばれた現代語の項目と同じ番号・同じ訳を使います（語群の下の「誤りを報告」も同じ書式で，`corrections/translations.tsv` の訂正は両方に当たります）．
 
 ### 誤りを知らせる（どなたでも）
 
@@ -50,7 +51,8 @@
 ## English
 
 The Japanese and English translations on this site are attached automatically: each Middle/Early Modern Korean entry (historical data of 우리말샘) receives the equivalents
-that 한국어기초사전 gives for the same modern headword. A translation may belong to another sense of that headword, or an entry may contain a form of a different word.
+that 한국어기초사전 gives for the same modern headword (only those of senses with the same part of speech, if there are any). A translation may belong to another sense of that headword, or an entry may contain a form of a different word.
+Word groups in the dialect search use the number and translations of the modern entry they are linked to (their “Report an error” link uses the same form, and a line in `corrections/translations.tsv` applies to both).
 
 ### Reporting (anyone)
 
