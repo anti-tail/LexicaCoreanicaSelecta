@@ -199,7 +199,14 @@
         <div class="item-head"><span class="item-hw">${esc(r[1])}</span>${r[2] ? `<span class="faint">「${r[2]}」</span>` : ''}<span class="item-old">${shown.map(esc).join('　')}</span>${Study && Study.isOn(bmKey(r[1], r[2])) ? '<span class="item-bm" aria-hidden="true">★</span>' : ''}</div>
         ${r[TRI] ? `<div class="item-ja">${esc(r[TRI])}</div>` : ''}${r[7] ? `<div class="item-gl">${esc(r[7])}</div>` : ''}</li>`;
   }
-  const bindRows = () => $$('#results .item[data-id]').forEach(li => { li.onclick = () => open(+li.dataset.id); li.onkeydown = e => { if (e.key === 'Enter') open(+li.dataset.id); }; });
+  // 一覧の行を開く．ブックマークの一覧では歴史形の項目と方言の語群が混じるので，行の data-kind で開き方を分ける
+  async function openRow(li) {
+    const id = +li.dataset.id, k = li.dataset.kind || (TAB === 'd' ? 'd' : 'h');
+    if (k !== TAB) { await setTab(k, false); hashKey = ''; }
+    if (k === 'd') dopen(id); else open(id);
+    $$('#results .item[data-id]').forEach(x => x.setAttribute('aria-selected', x === li));
+  }
+  const bindRows = () => $$('#results .item[data-id]').forEach(li => { li.onclick = () => openRow(li); li.onkeydown = e => { if (e.key === 'Enter') openRow(li); }; });
   let listMode = 'search', bmTag = '';
   function search(raw) {
     listMode = 'search'; bmButton();
@@ -230,10 +237,22 @@
   // ---------- ブックマークと復習（lexica-study.js．記録は閲覧者のブラウザにだけ置く）
   // 項目の目印は 見出し＋語義番号（項目番号は lexica.db を作り直すと変わりうるので使わない）
   const bmKey = (hw, sn) => `${(hw || '').normalize('NFC')}|${sn || 0}`;
+  // 方言の語群は d: を付ける．標準語に結ばれていない語群（印 2）は 最初の形＋語釈 で
+  const dKey = r => (r[8] & 2 ? `d:~${(dForms(r)[0]?.[0] || '').normalize('NFC')}|${(r[6] || '').slice(0, 40)}` : `d:${bmKey(r[1], r[2])}`);
+  const isD = key => key.startsWith('d:');
+  let DKEY = null;
+  function resolveD(key, id) {
+    if (!DIAL) return id;
+    const r = DIAL.byId.get(id);
+    if (r && dKey(r) === key) return id;
+    if (!DKEY) { DKEY = new Map(); for (const x of DIAL.rows) { const k = dKey(x); if (!DKEY.has(k)) DKEY.set(k, x[0]); } }
+    return DKEY.get(key) ?? null;
+  }
   let Study = null, ROW = null;
   const rowById = id => { if (!ROW) { ROW = new Map(); for (const r of INDEX) ROW.set(r[0], r); } return ROW.get(id); };
   let ROWKEY = null;
   function resolveKey(key, snap, id) {
+    if (isD(key)) return resolveD(key, id);
     const r = rowById(id);
     if (r && bmKey(r[1], r[2]) === key) return id;
     if (!ROWKEY) { ROWKEY = new Map(); for (const x of INDEX) { const k = bmKey(x[1], x[2]); if (!ROWKEY.has(k)) ROWKEY.set(k, x[0]); } }
@@ -245,8 +264,8 @@
     return e.f.filter(f => !isHidden(e.id, f[1])).sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]) || (a[5] || 0) - (b[5] || 0));
   }
   const CX = {
-    ja: { dirF: '中期・近世の形 → 訳', dirR: '訳 → 中期・近世の形', modern: '現代語', noTr: '（訳なし）', hint: '現代語の見出しを見る', src: '우리말샘（国立国語院）の歴史情報，訳は 한국어기초사전．CC BY-SA 2.0 KR' },
-    en: { dirF: 'Middle/Early Modern form → meaning', dirR: 'Meaning → Middle/Early Modern form', modern: 'Modern Korean', noTr: '(no translation)', hint: 'Show the modern headword', src: '우리말샘 (National Institute of Korean Language), historical data; English from 한국어기초사전. CC BY-SA 2.0 KR' },
+    ja: { dirF: '中期・近世の形 → 訳', dirR: '訳 → 中期・近世の形', dirDF: '方言形 → 意味', dirDR: '意味 → 方言形', kindH: '中期・近世の形', kindD: '方言', std: '標準語', loose: '標準語に結ばれていない方言項目', dsrc: '우리말샘（国立国語院）の方言項目，訳は 한국어기초사전．CC BY-SA 2.0 KR', modern: '現代語', noTr: '（訳なし）', hint: '現代語の見出しを見る', src: '우리말샘（国立国語院）の歴史情報，訳は 한국어기초사전．CC BY-SA 2.0 KR' },
+    en: { dirF: 'Middle/Early Modern form → meaning', dirR: 'Meaning → Middle/Early Modern form', dirDF: 'Dialect form → meaning', dirDR: 'Meaning → dialect forms', kindH: 'Middle/Early Modern Korean', kindD: 'Dialects', std: 'Standard Korean', loose: 'Dialect entry not linked to a standard word', dsrc: '우리말샘 (National Institute of Korean Language), dialect entries; English from 한국어기초사전. CC BY-SA 2.0 KR', modern: 'Modern Korean', noTr: '(no translation)', hint: 'Show the modern headword', src: '우리말샘 (National Institute of Korean Language), historical data; English from 한국어기초사전. CC BY-SA 2.0 KR' },
   }[LANG];
   function snapshot(e) {
     const fs = cardForms(e), o = e._orig || { ja: e.ja, en: e.en };
@@ -283,51 +302,115 @@
       (m.c ? `<br><br>${esc(m.c[3] || '')} ${esc((m.c[4] || m.c[1] || '').replace(/[{}]/g, ''))}` : '') + `<br><br><small>${esc(CX.src)}</small>`;
     return [front, back, detail];
   }
+  // ---- 方言の語群のカード．e = { kind: 'd', id, r }（r は data/d/index.json の行）
+  const dEntry = r => ({ kind: 'd', id: r[0], r });
+  const regNames = codes => codes.slice(0, 6).map(rname).join(TX.sep) + (codes.length > 6 ? '…' : '');
+  function dMaterial(e, snap) {
+    if (e && e.r) {
+      const r = e.r, fs = dForms(r).map(f => [f[0], f[1]]).sort((a, b) => b[1].length - a[1].length);
+      return { loose: !!(r[8] & 2), hw: r[1], sn: r[2], pos: r[3], tr: r[DTR] ? r[DTR].split(DTRSEP).filter(Boolean) : [], gl: r[6], f: fs };
+    }
+    return { loose: snap.loose, hw: snap.hw, sn: snap.sn, pos: snap.pos, tr: snap[LANG] || [], gl: snap.gl, f: snap.f || [] };
+  }
+  function dSnapshot(e) {
+    const r = e.r, m = dMaterial(e);
+    return { kind: 'd', loose: m.loose, hw: r[1], sn: r[2] || 0, pos: r[3] || '', ja: (r[4] || '').split('；').filter(Boolean).slice(0, 4), en: (r[5] || '').split('; ').filter(Boolean).slice(0, 6), gl: (r[6] || '').slice(0, 120), f: m.f.slice(0, 10) };
+  }
+  const stdLine = m => (m.loose ? `<span class="tag">${esc(CX.loose)}</span>` : `${CX.std}　<span class="hangul">${esc(m.hw)}</span>${m.sn ? `<small class="faint">「${m.sn}」</small>` : ''}`);
+  const dFormsList = m => `<table class="ls-forms"><tbody>${m.f.slice(0, 10).map(f => `<tr><td class="hangul">${esc(f[0])}</td><td class="faint">${esc(regNames(f[1]))}</td></tr>`).join('')}</tbody></table>${m.f.length > 10 ? `<div class="faint" style="text-align:center">+${m.f.length - 10}</div>` : ''}`;
+  function dCard(e, dir, snap) {
+    const m = dMaterial(e, snap), f0 = m.f[0];
+    const meaning = `<div class="card-tr">${trLine(m)}</div><div class="card-modern">${stdLine(m)}${m.pos ? ` <span class="tag">${esc(m.pos)}</span>` : ''}</div>`;
+    if (dir === 'df') {
+      const front = f0 ? `<div class="card-old hangul">${esc(f0[0])}</div><div class="card-period faint">${esc(regNames(f0[1]))}</div>` : meaning;
+      return { front, back: meaning + dFormsList(m) };
+    }
+    const front = `<div class="card-q">${trLine(m)}</div><div class="card-modern">${stdLine(m)}${m.pos ? ` <span class="tag">${esc(m.pos)}</span>` : ''}</div>`;
+    return { front, back: dFormsList(m) };
+  }
+  function dAnki(e, snap) {
+    const m = dMaterial(e, snap), f0 = m.f[0];
+    const front = f0 ? `<div style="font-size:2em">${esc(f0[0])}</div><div style="font-size:.8em">${esc(regNames(f0[1]))}</div>` : esc(m.hw);
+    const back = `<div style="font-weight:600">${m.tr.slice(0, 4).map(esc).join(' / ') || esc(m.gl || '')}</div><div style="font-size:.85em">${m.loose ? esc(CX.loose) : `${CX.std}: ${esc(m.hw)}${m.sn ? ' 「' + m.sn + '」' : ''}`}${m.pos ? ' (' + esc(m.pos) + ')' : ''}</div>`;
+    const detail = m.f.map(f => `${esc(f[0])} <span style="font-size:.85em">${esc(f[1].map(rname).join(TX.sep))}</span>`).join('<br>') + `<br><br><small>${esc(CX.dsrc)}</small>`;
+    return [front, back, detail];
+  }
   // 結果欄の上：「ブックマーク」で一覧を切り替える
   function bmButton() {
     const b = $('#bm-list'); if (!b || !Study) return;
     b.hidden = false;
     b.textContent = listMode === 'bm' ? Study.text.backToResults : Study.text.bookmarks(Study.count());
   }
-  function showBookmarks() {
+  let bmKind = '';
+  async function showBookmarks() {
     listMode = 'bm'; bmButton();
-    const st = sel(), tags = Study.allTags();
+    const st = sel(), tags = Study.allTags(), all = Study.bookmarks();
+    if (all.some(b => b.kind === 'd')) await loadDial();
+    if (listMode !== 'bm') return;
+    const kinds = [['h', CX.kindH], ['d', CX.kindD]].filter(([k]) => all.some(b => b.kind === k));
     if (bmTag && !tags.includes(bmTag)) bmTag = '';
-    const list = Study.bookmarks(bmTag);
+    if (bmKind && !kinds.some(([k]) => k === bmKind)) bmKind = '';
+    const list = Study.bookmarks({ kind: bmKind, tag: bmTag });
     $('#info').textContent = Study.text.bookmarks(Study.count());
-    const bar = tags.length ? `<li class="ls-listbar" aria-label="${esc(Study.text.tagFilter)}"><button type="button" class="ls-chip" data-tag="" aria-pressed="${!bmTag}">${esc(Study.text.all)}</button>${tags.map(t => `<button type="button" class="ls-chip" data-tag="${esc(t)}" aria-pressed="${t === bmTag}">${esc(t)}</button>`).join('')}</li>` : '';
+    const chip = (attr, v, label, on) => `<button type="button" class="ls-chip" ${attr}="${esc(v)}" aria-pressed="${on}">${esc(label)}</button>`;
+    const bar = kinds.length > 1 || tags.length ? `<li class="ls-listbar" aria-label="${esc(Study.text.tagFilter)}">${chip('data-kind', '', Study.text.all, !bmKind && !bmTag)}` +
+      (kinds.length > 1 ? kinds.map(([k, l]) => chip('data-kind', k, l, k === bmKind)).join('') : '') + tags.map(t => chip('data-tag', t, t, t === bmTag)).join('') + '</li>' : '';
+    const lost = b => `<li class="item"><div class="item-head"><span class="item-hw">${esc(b.snap.hw || (b.snap.f || [])[0]?.[0] || '')}</span>${b.snap.sn ? `<span class="faint">「${b.snap.sn}」</span>` : ''}</div><div class="item-gl">${esc(Study.text.lost)}</div></li>`;
     $('#results').innerHTML = bar + (list.length ? list.map(b => {
+      if (b.kind === 'd') { const r = b.id != null && DIAL && DIAL.byId.get(b.id); return r ? dRowHtml(r, dForms(r)) : lost(b); }
       const r = b.id != null && rowById(b.id);
-      if (r) return rowHtml(r, st, null);
-      return `<li class="item"><div class="item-head"><span class="item-hw">${esc(b.snap.hw)}</span>${b.snap.sn ? `<span class="faint">「${b.snap.sn}」</span>` : ''}<span class="item-old">${(b.snap.f || []).slice(0, 3).map(f => esc(f[1])).join('　')}</span></div><div class="item-gl">${esc(Study.text.lost)}</div></li>`;
+      return r ? rowHtml(r, st, null).replace('<li class="item"', '<li class="item" data-kind="h"') : lost(b);
     }).join('') : `<li class="empty">${esc(Study.text.empty)}</li>`);
-    $$('#results .ls-chip').forEach(c => { c.onclick = () => { bmTag = c.dataset.tag; showBookmarks(); }; });
+    $$('#results .ls-chip').forEach(c => {
+      c.onclick = () => { if (c.hasAttribute('data-tag')) { bmTag = bmTag === c.dataset.tag ? '' : c.dataset.tag; } else { bmKind = c.dataset.kind; if (!bmKind) bmTag = ''; } showBookmarks(); };
+    });
     bindRows();
+  }
+  let openedEntry = null;   // 右の欄に開いている項目（歴史形の項目，または dEntry）
+  function refreshBar() {
+    const bar = $('#detail .ls-bar'); if (!bar || !openedEntry) return;
+    bar.outerHTML = Study.bar(openedEntry); Study.bindBar($('#detail'), openedEntry);
+  }
+  function markRows() {
+    $$('#results .item[data-id]').forEach(li => {
+      const id = +li.dataset.id, d = (li.dataset.kind || TAB) === 'd';
+      const r = d ? DIAL && DIAL.byId.get(id) : rowById(id);
+      const on = r && Study.isOn(d ? dKey(r) : bmKey(r[1], r[2])), s = li.querySelector('.item-bm');
+      if (on && !s) li.querySelector('.item-head').insertAdjacentHTML('beforeend', '<span class="item-bm" aria-hidden="true">★</span>');
+      else if (!on && s) s.remove();
+    });
   }
   function setupStudy() {
     if (!window.LexicaStudy) return;
     Study = window.LexicaStudy.init({
       site: 'coreanica-selecta', lang: LANG, ankiTag: 'LexicaCoreanicaSelecta',
-      dirs: [{ id: 'f', label: CX.dirF }, { id: 'r', label: CX.dirR }],
+      kinds: [{ id: 'h', label: CX.kindH, anki: LANG === 'en' ? 'MiddleKorean' : '中期・近世' }, { id: 'd', label: CX.kindD, anki: LANG === 'en' ? 'dialect' : '方言' }],
+      dirs: [{ id: 'f', kind: 'h', label: CX.dirF }, { id: 'r', kind: 'h', label: CX.dirR }, { id: 'df', kind: 'd', label: CX.dirDF }, { id: 'dr', kind: 'd', label: CX.dirDR }],
       adapter: {
-        key: e => bmKey(e.hw, e.sn), snapshot, resolve: resolveKey, load: loadEntry, card: makeCard, anki: ankiCard,
-        url: id => `${location.href.split('#')[0]}#id=${id}`,
+        kind: key => (isD(key) ? 'd' : 'h'),
+        key: e => (e.kind === 'd' ? dKey(e.r) : bmKey(e.hw, e.sn)),
+        snapshot: e => (e.kind === 'd' ? dSnapshot(e) : snapshot(e)),
+        resolve: resolveKey,
+        load: async (id, key) => {
+          if (!isD(key)) return loadEntry(id);
+          await loadDial(); DKEY = null;
+          const r = DIAL.byId.get(resolveD(key, id));
+          return r ? dEntry(r) : null;
+        },
+        card: (e, dir, snap, key) => (isD(key) ? dCard(e, dir, snap) : makeCard(e, dir, snap)),
+        anki: (e, snap, key) => (isD(key) ? dAnki(e, snap) : ankiCard(e, snap)),
+        url: (id, key) => `${location.href.split('#')[0]}#${isD(key) ? 't=d&' : ''}id=${id}`,
         changed: external => {
-          if (listMode === 'bm') showBookmarks();
-          else { bmButton(); $$('#results .item[data-id]').forEach(li => { const r = rowById(+li.dataset.id); const on = r && Study.isOn(bmKey(r[1], r[2])); const s = li.querySelector('.item-bm'); if (on && !s) li.querySelector('.item-head').insertAdjacentHTML('beforeend', '<span class="item-bm" aria-hidden="true">★</span>'); else if (!on && s) s.remove(); }); }
-          // 別のタブで変わったとき，開いている項目のボタンも合わせる
-          if (external && TAB !== 'd' && $('#detail .ls-bar') && current) loadEntry(current).then(e => { if (e && $('#detail .ls-bar')) { $('#detail .ls-bar').outerHTML = Study.bar(e); Study.bindBar($('#detail'), e); } });
+          if (listMode === 'bm') showBookmarks(); else { bmButton(); markRows(); }
+          if (external) refreshBar();   // 別のタブでの変更や読み込み
         },
       },
     });
     Study.mountButton($('#study'));
-    // 方言のタブにいるときは，歴史形のタブに移ってから一覧を出す
-    $('#bm-list').onclick = async () => {
-      if (listMode === 'bm') { search($('#q').value); return; }
-      if (TAB === 'd') { await setTab('h', false); setHash(); hashKey = ''; }
-      showBookmarks();
-    };
+    $('#bm-list').onclick = () => { if (listMode === 'bm') search($('#q').value); else showBookmarks(); };
     bmButton();
+    // 方言のブックマークがあれば，語群の表を先に読んでおく（番号の付け直しと一覧の表示に使う）
+    if (Study.bookmarks({ kind: 'd' }).length) loadDial().then(() => { DKEY = null; if (listMode === 'bm') showBookmarks(); });
   }
 
   // ---------- 訳と形の対応付けの訂正（corrections/translations.tsv．協力者が公開用リポジトリで直す．書式は CONTRIBUTING.md）
@@ -428,7 +511,7 @@
       e.c.map(c => `<tr><td>${vtag(c[0])}</td><td class="num">${esc(c[2] ?? '')}</td><td class="num">${esc(c[3])}</td><td class="ctx">${ctx(c[4]) || `<span class="hangul">${esc(c[1])}</span>`}</td></tr>`).join('') + '</tbody></table>';
     h += `<p class="faint" style="font-size:12px;margin-top:18px">${TX.source(e.ja.length)}<a href="https://opendict.korean.go.kr/search/searchResult?query=${encodeURIComponent(e.hw)}" rel="noopener" target="_blank">${TX.openOD}</a>　<a class="report" href="${reportUrl(e, forms)}" target="_blank" rel="noopener" title="${esc(TX.reportTip)}">${TX.report}</a></p></div>`;
     $('#detail').innerHTML = h;
-    if (Study) Study.bindBar($('#detail'), e);
+    if (Study) { openedEntry = e; Study.bindBar($('#detail'), e); }
     $('#detail').scrollTop = 0;
     $$('#detail .dleg li').forEach(li => { li.onclick = () => focusGroup(li); li.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); focusGroup(li); } }; });
   }
@@ -592,19 +675,22 @@
   }
   function renderDList(info) {
     $('#info').textContent = info;
-    const li = dHits.slice(0, dShown).map(([, r, fs]) => {
-      const loose = r[8] & 2;
-      const shown = fs.slice(0, 5).map(f => `<span class="dform"><span class="hangul">${esc(f[0])}</span><span class="rg">${f[1].slice(0, 4).map(rname).map(esc).join('・')}${f[1].length > 4 ? '…' : ''}</span></span>`).join('');
-      const rest = fs.length > 5 ? `<span class="faint">+${fs.length - 5}</span>` : '';
-      return `<li class="item" data-id="${r[0]}" tabindex="0" aria-selected="${r[0] === dcur}">
-        <div class="item-head"><span class="item-hw">${esc(loose ? dForms(r)[0][0] : r[1])}</span>${r[2] ? `<span class="faint">「${r[2]}」</span>` : ''}${loose ? `<span class="tag" title="${esc(TX.dLooseTip)}">${TX.dLoose}</span>` : ''}</div>
-        ${r[DTR] ? `<div class="item-ja">${esc(r[DTR])}</div>` : r[6] ? `<div class="item-gl">${esc(r[6])}</div>` : ''}
-        <div class="item-dforms">${shown}${rest}</div></li>`;
-    }).join('');
+    listMode = 'search'; bmButton();
+    const li = dHits.slice(0, dShown).map(([, r, fs]) => dRowHtml(r, fs)).join('');
     const left = dHits.length - dShown;
     $('#results').innerHTML = li + (left > 0 ? `<li class="more"><button type="button" class="link-btn" id="dmore">${TX.more(left.toLocaleString())}</button></li>` : '');
     $$('#results .item').forEach(x => { x.onclick = () => dopen(+x.dataset.id); x.onkeydown = e => { if (e.key === 'Enter') dopen(+x.dataset.id); }; });
     const mb = $('#dmore'); if (mb) mb.onclick = () => { dShown += 300; renderDList($('#info').textContent); };
+  }
+  // 語群の一覧の行（fs：先に並べる形）
+  function dRowHtml(r, fs) {
+      const loose = r[8] & 2;
+      const shown = fs.slice(0, 5).map(f => `<span class="dform"><span class="hangul">${esc(f[0])}</span><span class="rg">${f[1].slice(0, 4).map(rname).map(esc).join('・')}${f[1].length > 4 ? '…' : ''}</span></span>`).join('');
+      const rest = fs.length > 5 ? `<span class="faint">+${fs.length - 5}</span>` : '';
+      return `<li class="item" data-id="${r[0]}" data-kind="d" tabindex="0" aria-selected="${r[0] === dcur}">
+        <div class="item-head"><span class="item-hw">${esc(loose ? dForms(r)[0][0] : r[1])}</span>${r[2] ? `<span class="faint">「${r[2]}」</span>` : ''}${loose ? `<span class="tag" title="${esc(TX.dLooseTip)}">${TX.dLoose}</span>` : ''}${Study && Study.isOn(dKey(r)) ? '<span class="item-bm" aria-hidden="true">★</span>' : ''}</div>
+        ${r[DTR] ? `<div class="item-ja">${esc(r[DTR])}</div>` : r[6] ? `<div class="item-gl">${esc(r[6])}</div>` : ''}
+        <div class="item-dforms">${shown}${rest}</div></li>`;
   }
   async function dopen(id, keepHash) {
     await loadDial();
@@ -620,6 +706,7 @@
     const tr = r[DTR] ? r[DTR].split(DTRSEP) : [];
     let h = `<div class="entry"><div class="entry-hw">${esc(loose ? fs[0][0] : r[1])}${r[2] ? `<small>「${r[2]}」</small>` : ''}</div>
       <div>${r[3] ? `<span class="tag">${esc(r[3])}</span>` : ''}${loose ? `<span class="tag" title="${esc(TX.dLooseTip)}">${TX.dLoose}</span>` : ''}</div>
+      ${Study ? Study.bar(dEntry(r)) : ''}
       ${tr.length ? `<div class="entry-ja">${tr.map(esc).join(LANG === 'en' ? ' / ' : '　／　')}</div>` : ''}${fixedNote(id, { tr0: tr, ja: tr })}
       ${r[6] ? `<div class="entry-gl">${esc(r[6])}</div>` : ''}
       ${r[8] & 1 ? `<p class="dmap-more"><a href="#t=h&id=${id}">${TX.toHist}</a></p>` : ''}`;
@@ -645,6 +732,7 @@
     const od = q => `https://opendict.korean.go.kr/search/searchResult?query=${encodeURIComponent(q)}`;
     h += `<p class="faint" style="font-size:12px;margin-top:18px">${TX.dSource(tr.length)}<a href="${od(loose ? fs[0][0] : r[1])}" rel="noopener" target="_blank">${TX.openOD}</a>${loose ? '' : `　<a class="report" href="${reportUrl({ id, hw: r[1], sn: r[2], ja: tr, other: (r[LANG === 'en' ? 4 : 5] || '').split(LANG === 'en' ? '；' : '; ').filter(Boolean) }, fs.map(f => [null, f[0]]))}" target="_blank" rel="noopener" title="${esc(TX.reportTip)}">${TX.report}</a>`}</p></div>`;
     $('#detail').innerHTML = h;
+    if (Study) { openedEntry = dEntry(r); Study.bindBar($('#detail'), openedEntry); }
     $('#detail').scrollTop = 0;
     $$('#detail .dleg li').forEach(li => { li.onclick = () => focusGroup(li); li.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); focusGroup(li); } }; });
   }

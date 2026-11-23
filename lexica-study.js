@@ -11,7 +11,9 @@
        anki(e, snap)          → [表の HTML, 裏の HTML, 詳細の HTML]（Anki の「基本（裏表反転カード付き）」に入る 2 欄＋詳細）
        url(id)                → 項目を開く URL
        changed(external)      → ブックマークが変わったとき（一覧や印を描き直す．external：別のタブや読み込みでの変更）
-     dirs: [{ id: 'f', label: '…' }, …]：カードの向き（1 項目につき向きごとに 1 枚）
+       load・resolve・card・anki・url には最後の引数として目印（key）も渡す
+     kinds: [{ id: 'h', label: '…', anki: '…' }, …]：項目の種類（例：歴史形と方言）．adapter.kind(key) で目印から種類を返す
+     dirs: [{ id: 'f', kind: 'h', label: '…' }, …]：カードの向き（1 項目につき，その種類の向きごとに 1 枚．kind を省くとすべての種類）
    ・同じ項目の別の向きのカードは，同じ日には出さない（Anki の「兄弟カードの延期」と同じ）． */
 (() => {
   'use strict';
@@ -152,6 +154,7 @@
 .ls-body h4 { margin: 20px 0 8px; font-size: 13px; color: var(--muted, #555); font-weight: 600; }
 .ls-row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin: 6px 0; }
 .ls-row label { display: inline-flex; gap: 6px; align-items: center; }
+.ls-sub { margin-left: 1em; } .ls-kind { min-width: 9em; color: var(--muted, #555); }
 .ls-note { font-size: 12px; color: var(--faint, #888); margin: 4px 0; }
 .ls-big { font-size: 13.5px; }
 .ls-btn { height: 34px; padding: 0 14px; border: 1px solid var(--rule-strong, #bbb); border-radius: 4px; background: var(--surface, #fff); color: var(--ink, #111); font: inherit; font-size: 13px; cursor: pointer; }
@@ -186,18 +189,22 @@
 
   function init(opt) {
     const T = { ...TEXT[opt.lang === 'en' ? 'en' : 'ja'], ...(opt.text || {}) };
-    const A = opt.adapter, DIRS = opt.dirs || [{ id: 'f', label: 'front → back' }];
+    const A = opt.adapter, DIRS = opt.dirs || [{ id: 'f', label: 'front → back' }], KINDS = opt.kinds || [];
+    const kindOf = k => (A.kind ? A.kind(k) : '') || '';
+    const dirsFor = kind => DIRS.filter(d => !d.kind || d.kind === kind);
     const KEY = `lexica.study.v1.${opt.site}`;
     const fresh = () => ({ v: 1, site: opt.site, bm: {}, cards: {}, conf: { perDay: 20, dirs: Object.fromEntries(DIRS.map(d => [d.id, true])), ret: 0.9, scope: '' }, days: {} });
     let S = fresh(), storeOk = true;
     const load = () => {
-      try { const t = localStorage.getItem(KEY); S = t ? { ...fresh(), ...JSON.parse(t) } : fresh(); S.conf = { ...fresh().conf, ...S.conf }; }
+      try { const t = localStorage.getItem(KEY); S = t ? { ...fresh(), ...JSON.parse(t) } : fresh(); S.conf = { ...fresh().conf, ...S.conf, dirs: { ...fresh().conf.dirs, ...(S.conf || {}).dirs } }; }
       catch (_) { storeOk = false; }
     };
     const save = () => {
       try { localStorage.setItem(KEY, JSON.stringify(S)); storeOk = true; } catch (_) { storeOk = false; }
     };
     load();
+    // ブックマークにその種類の向きのカードがそろっているか（向きをあとで足したとき）
+    for (const k of Object.keys(S.bm)) for (const d of dirsFor(kindOf(k))) { const ck = `${k}#${d.id}`; if (!S.cards[ck]) S.cards[ck] = { k, d: d.id, st: 0, reps: 0, lapses: 0 }; }
 
     // ---------- ブックマーク
     const isOn = k => !!S.bm[k];
@@ -206,7 +213,7 @@
       if (S.bm[k]) delete S.bm[k];
       else {
         S.bm[k] = { id: e.id, t: Date.now(), tags: [], snap: A.snapshot(e) };
-        for (const d of DIRS) { const ck = `${k}#${d.id}`; if (!S.cards[ck]) S.cards[ck] = { k, d: d.id, st: 0, reps: 0, lapses: 0 }; }
+        for (const d of dirsFor(kindOf(k))) { const ck = `${k}#${d.id}`; if (!S.cards[ck]) S.cards[ck] = { k, d: d.id, st: 0, reps: 0, lapses: 0 }; }
       }
       save(); changed();
       return !!S.bm[k];
@@ -214,10 +221,12 @@
     function setTags(k, tags) { if (!S.bm[k]) return; S.bm[k].tags = [...new Set(tags.map(t => t.trim()).filter(Boolean))]; save(); changed(); }
     const allTags = () => [...new Set(Object.values(S.bm).flatMap(b => b.tags || []))].sort();
     // 保存したブックマークを今のデータの項目番号に結び直す（DB を作り直して番号が変わっても追える）
-    const idOf = k => { const b = S.bm[k]; if (!b) return null; const id = A.resolve(k, b.snap, b.id); if (id != null && id !== b.id) { b.id = id; save(); } return id; };
-    function bookmarks(tag) {
-      return Object.entries(S.bm).filter(([, b]) => !tag || (b.tags || []).includes(tag))
-        .sort((a, b) => b[1].t - a[1].t).map(([k, b]) => ({ key: k, id: idOf(k), snap: b.snap, tags: b.tags || [], t: b.t }));
+    const idOf = k => { const b = S.bm[k]; if (!b) return null; const id = A.resolve(k, b.snap, b.id, k); if (id != null && id !== b.id) { b.id = id; save(); } return id; };
+    // f：{ tag, kind } または範囲の文字列（'k:種類'・'t:タグ'）
+    function bookmarks(f) {
+      const sc = typeof f === 'string' ? f : f ? (f.kind ? 'k:' + f.kind : f.tag ? 't:' + f.tag : '') : '';
+      return Object.entries(S.bm).filter(([k, b]) => inFilter(k, b, sc) && (!(f && f.kind && f.tag) || (b.tags || []).includes(f.tag)))
+        .sort((a, b) => b[1].t - a[1].t).map(([k, b]) => ({ key: k, kind: kindOf(k), id: idOf(k), snap: b.snap, tags: b.tags || [], t: b.t }));
     }
 
     // 項目の見出しの横に置く：ブックマークのボタンとタグ
@@ -251,9 +260,11 @@
     // ---------- 復習の順番
     const today = () => dayOf(Date.now());
     const dayRec = () => (S.days[dateKey(today())] ??= { n: 0, r: 0 });
-    const inScope = c => { const b = S.bm[c.k]; return b && S.conf.dirs[c.d] && (!S.conf.scope || (b.tags || []).includes(S.conf.scope)); };
+    // 範囲：'' すべて，'k:種類'，'t:タグ'（古い記録のタグだけの値もタグとみなす）
+    const inFilter = (k, b, sc) => !sc || (sc.startsWith('k:') ? kindOf(k) === sc.slice(2) : (b.tags || []).includes(sc.replace(/^t:/, '')));
+    const inScope = c => { const b = S.bm[c.k]; return b && S.conf.dirs[c.d] && inFilter(c.k, b, S.conf.scope); };
     // 同じ項目の別の向きのカードを今日すでに出したか
-    const siblingToday = c => DIRS.some(d => d.id !== c.d && (S.cards[`${c.k}#${d.id}`]?.last ?? -Infinity) >= dayStart(today()));
+    const siblingToday = c => dirsFor(kindOf(c.k)).some(d => d.id !== c.d && (S.cards[`${c.k}#${d.id}`]?.last ?? -Infinity) >= dayStart(today()));
     function queue(now = Date.now()) {
       const learn = [], review = [], fresh = [];
       for (const [ck, c] of Object.entries(S.cards)) {
@@ -301,16 +312,19 @@
     function render() {
       if (view === 'review') return renderReview();
       const c = counts(), nb = Object.keys(S.bm).length, nc = Object.values(S.cards).filter(x => S.bm[x.k] && S.conf.dirs[x.d]).length, tags = allTags();
+      const kinds = KINDS.filter(kd => Object.keys(S.bm).some(k => kindOf(k) === kd.id));
+      const sc = S.conf.scope && !S.conf.scope.includes(':') ? 't:' + S.conf.scope : S.conf.scope;
+      const scopeOpts = [...(kinds.length > 1 ? kinds.map(kd => ['k:' + kd.id, kd.label]) : []), ...tags.map(t => ['t:' + t, t])];
       const nextT = c.later.length ? Math.min(...c.later) : null;
       dlg.innerHTML = head() + `<div class="ls-body">
         ${storeOk ? '' : `<p class="ls-msg err">${esc(T.storeErr)}</p>`}
         ${nb ? `<p class="ls-big">${esc(T.summary(nb, nc))}<br>${esc(T.today(c.nw, c.lr, c.rv))}</p>` : `<p class="ls-big">${esc(T.empty)}</p>`}
-        ${tags.length ? `<div class="ls-row"><label>${esc(T.scope)} <select class="ls-in" data-k="scope"><option value="">${esc(T.all)}</option>${tags.map(t => `<option${t === S.conf.scope ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></label></div>` : ''}
+        ${scopeOpts.length ? `<div class="ls-row"><label>${esc(T.scope)} <select class="ls-in" data-k="scope"><option value="">${esc(T.all)}</option>${scopeOpts.map(([v, l]) => `<option value="${esc(v)}"${v === sc ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label></div>` : ''}
         <div class="ls-row"><button type="button" class="ls-btn pri" data-act="start"${nextCard() ? '' : ' disabled'}>${esc(T.start)}</button>
           ${nb && !nextCard() ? `<span class="ls-note">${esc(T.nothing)}${nextT ? ' ' + esc(T.nextAt(T.time(nextT))) : ''}</span>` : ''}</div>
         <h4>${esc(T.settings)}</h4>
         <div class="ls-row"><label>${esc(T.perDay)} <input class="ls-in" type="number" min="0" max="999" data-k="perDay" value="${S.conf.perDay}"></label></div>
-        <div class="ls-row"><span>${esc(T.dirs)}</span>${DIRS.map(d => `<label><input type="checkbox" data-dir="${esc(d.id)}"${S.conf.dirs[d.id] ? ' checked' : ''}> ${d.label}</label>`).join('')}</div>
+        ${KINDS.length ? `<div class="ls-row"><span>${esc(T.dirs)}</span></div>` : ''}${(KINDS.length ? KINDS : [{ id: '', label: T.dirs }]).map(kd => `<div class="ls-row${KINDS.length ? ' ls-sub' : ''}"><span class="ls-kind">${esc(kd.label)}</span>${dirsFor(kd.id).map(d => `<label><input type="checkbox" data-dir="${esc(d.id)}"${S.conf.dirs[d.id] ? ' checked' : ''}> ${d.label}</label>`).join('')}</div>`).join('')}
         <div class="ls-row"><label>${esc(T.retention)} <input class="ls-in" type="number" min="70" max="99" data-k="ret" value="${Math.round(S.conf.ret * 100)}"> %</label></div>
         <p class="ls-note">${esc(T.retentionNote)}</p>
         <h4>${esc(T.data)}</h4>
@@ -360,9 +374,10 @@
       const q = v => `"${String(v ?? '').replace(/[\t\r\n]+/g, ' ').replace(/"/g, '""')}"`;
       const rows = [];
       for (const b of bookmarks(S.conf.scope)) {
-        let e = null; try { if (b.id != null) e = await A.load(b.id); } catch (_) { e = null; }
-        const [front, back, detail] = A.anki(e, b.snap);
-        rows.push([front, back, detail, [opt.ankiTag || `Lexica_${opt.site}`].concat(b.tags.map(t => t.replace(/\s+/g, '_'))).join(' ')].map(q).join('\t'));
+        let e = null; try { if (b.id != null) e = await A.load(b.id, b.key); } catch (_) { e = null; }
+        const [front, back, detail] = A.anki(e, b.snap, b.key);
+        const kt = (KINDS.find(kd => kd.id === b.kind) || {}).anki;
+        rows.push([front, back, detail, [opt.ankiTag || `Lexica_${opt.site}`].concat(kt ? [kt] : [], b.tags.map(t => t.replace(/\s+/g, '_'))).join(' ')].map(q).join('\t'));
       }
       download(`lexica-${opt.site}-anki-${dateKey(today())}.txt`, `#separator:tab\n#html:true\n#tags column:4\n` + rows.join('\n') + '\n', 'text/tab-separated-values');
     }
@@ -379,9 +394,9 @@
         return;
       }
       const card = S.cards[cur], b = S.bm[card.k], id = idOf(card.k), mine = cur;
-      let e = null; try { if (id != null) e = await A.load(id); } catch (_) { e = null; }
+      let e = null; try { if (id != null) e = await A.load(id, card.k); } catch (_) { e = null; }
       if (mine !== cur || view !== 'review') return;
-      const { front, back } = A.card(e, card.d, b.snap);
+      const { front, back } = A.card(e, card.d, b.snap, card.k);
       const pv = preview(card, Date.now(), S.conf.ret);
       const names = [T.again, T.hard, T.good, T.easy];
       dlg.innerHTML = head() + `<div class="ls-body">
@@ -389,7 +404,7 @@
         <div class="ls-card">${e ? '' : `<div class="ls-lost">${esc(T.lost)}</div>`}<div class="ls-front">${front}</div>${shown ? `<div class="ls-answer">${back}</div>` : ''}</div>
         ${shown ? `<div class="ls-rates">${pv.map((p, i) => `<button type="button" data-g="${i + 1}">${esc(names[i])}<small>${esc(T.ivl(p.wait))}</small></button>`).join('')}</div>`
           : `<div class="ls-showrow"><button type="button" class="ls-btn pri" data-act="show">${esc(T.show)}</button></div>`}
-        <div class="ls-foot"><span>${esc(T.keys)}</span><span class="ls-links">${id != null && A.url ? `<a href="${esc(A.url(id))}" target="_blank" rel="noopener">${esc(T.openEntry)}</a>` : ''}
+        <div class="ls-foot"><span>${esc(T.keys)}</span><span class="ls-links">${id != null && A.url ? `<a href="${esc(A.url(id, card.k))}" target="_blank" rel="noopener">${esc(T.openEntry)}</a>` : ''}
           <button type="button" class="ls-link" data-act="undo"${undoStack.length ? '' : ' disabled'}>${esc(T.undo)}</button><button type="button" class="ls-link" data-act="home">${esc(T.back)}</button></span></div></div>`;
       dlg.querySelectorAll('[data-act]').forEach(x => x.addEventListener('click', () => act(x.dataset.act)));
       dlg.querySelectorAll('.ls-rates button').forEach(x => x.addEventListener('click', () => rate(+x.dataset.g)));
