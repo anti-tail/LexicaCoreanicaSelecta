@@ -16,7 +16,7 @@
 <header class="top">
   <div class="wrap top-row">
     <div class="mark"><span class="mark-title">Lexica Coreanica <span class="mark-selecta">Selecta</span></span><span class="mark-sub">日本語で中期朝鮮語・方言を引く</span></div>
-    <span class="top-links"><a href="en/" hreflang="en" lang="en">English</a><button type="button" class="link-btn" id="theme">暗い表示にする</button></span>
+    <span class="top-links"><a href="en/" hreflang="en" lang="en">English</a><button type="button" class="link-btn" id="study"></button><button type="button" class="link-btn" id="theme">暗い表示にする</button></span>
   </div>
   <div class="wrap">
     <nav class="tabs" role="tablist" aria-label="引く資料">
@@ -81,7 +81,7 @@
   </div>
 </header>
 <main class="wrap main">
-  <section class="pane list-pane" aria-label="結果"><div class="pane-head"><span id="info">読み込み中…</span></div><ul id="results" class="list"></ul></section>
+  <section class="pane list-pane" aria-label="結果"><div class="pane-head"><span id="info">読み込み中…</span><button type="button" class="link-btn" id="bm-list" hidden></button></div><ul id="results" class="list"></ul></section>
   <section class="pane detail-pane" aria-label="項目" id="detail">
     <div class="empty">
       <h2>使い方</h2>
@@ -106,6 +106,7 @@
 </footer>
 <script src="hkey.js"></script>
 <script src="hangulkbd.js"></script>
+<script src="lexica-study.js"></script>
 <script src="site.js"></script>
 </body>
 </html>

@@ -179,3 +179,21 @@ a.hitf { background: var(--ochre); color: var(--ochre-ink); border-radius: 2px; 
 .tips li { margin: 3px 0; }
 .dform .hangul { white-space: nowrap; }
 .dform .rg { white-space: normal; }
+
+/* ブックマークと復習（lexica-study.js が共通の部品の見た目を入れる．ここはこのサイトのカードと一覧） */
+.pane-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.item-bm { color: var(--ochre-ink); background: var(--ochre); border-radius: 3px; font-size: 11px; padding: 0 4px; margin-left: auto; }
+.card-old { font-size: 44px; line-height: 1.25; margin-bottom: 6px; text-align: center; }
+.card-period { text-align: center; margin-bottom: 8px; }
+.card-q { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.card-q .entry-gl { font-size: 14px; font-weight: 400; margin: 6px auto 0; }
+.card-hint { margin-top: 12px; font-size: 13px; color: var(--muted); }
+.card-hint summary { cursor: pointer; color: var(--indigo); }
+.card-hint .hangul { font-size: 20px; color: var(--ink); }
+.card-tr { font-size: 17px; font-weight: 600; text-align: center; }
+.card-modern { text-align: center; color: var(--muted); margin: 4px 0 10px; }
+.card-modern .hangul { font-size: 18px; color: var(--ink); }
+.ls-forms { width: auto; margin: 0 auto; }
+.ls-forms td { border-bottom: 0; padding: 2px 8px; }
+.card-cite { margin-top: 10px; font-size: 13px; text-align: center; }
+.card-cite .hangul { font-size: 15px; }
