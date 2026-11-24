@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Full-text search of citations — Lexica Coreanica Selecta</title>
+<meta name="description" content="Full-text search of the 15th–19th-century Korean citations in the historical information of Urimalsaem (National Institute of Korean Language), with period spellings absorbed.">
+<link rel="preload" href="../fonts/hangul.woff" as="font" type="font/woff" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../site.css">
+<link rel="stylesheet" href="../corpus.css">
+<link rel="alternate" hreflang="ja" href="../corpus.html">
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-row">
+    <div class="mark"><span class="mark-title">Lexica Coreanica <span class="mark-selecta">Selecta</span></span><span class="mark-sub">Middle Korean and dialects in English</span></div>
+    <span class="top-links"><a href="../corpus.html" hreflang="ja" lang="ja">日本語</a><button type="button" class="link-btn" id="theme">Dark theme</button></span>
+  </div>
+  <div class="wrap">
+    <nav class="tabs" aria-label="Resources">
+      <a class="tab-link" href="index.html">Middle &amp; Early Modern Korean<span class="tab-sub">15th–19th c.</span></a>
+      <a class="tab-link" href="index.html#t=d">Dialects<span class="tab-sub">maps · same meaning</span></a>
+      <a class="tab-link" href="corpus.html" aria-selected="true">Citations<span class="tab-sub">full text</span></a>
+    </nav>
+    <form id="f" class="query" autocomplete="off" role="search">
+      <input id="q" class="field big" type="search" placeholder="ᄆᆞᅀᆞᆷ　사ᄅᆞᆷ　^니ᄅᆞ" aria-label="Search" autofocus>
+      <button class="btn" type="submit">Search</button>
+    </form>
+    <div class="cq-ctl">
+      <span class="label">Matching</span>
+      <select id="mode" class="mode" aria-label="Matching">
+        <option value="era" selected>Absorb period spellings</option>
+        <option value="syl">Absorb syllable division only</option>
+        <option value="exact">Exact spelling</option>
+        <option value="re">Regular expression</option>
+      </select>
+      <span class="label sep">Period</span>
+      <span id="cents">
+        <label><input type="checkbox" value="15" checked> 15th c.</label>
+        <label><input type="checkbox" value="16" checked> 16th c.</label>
+        <label><input type="checkbox" value="17" checked> 17th c.</label>
+        <label><input type="checkbox" value="18" checked> 18th c.</label>
+        <label><input type="checkbox" value="19" checked> 19th c.</label>
+      </span>
+      <span class="label sep">Source</span><input id="doc" class="doc" list="doclist" placeholder="석상　번노" aria-label="Filter by source abbreviation"><datalist id="doclist"></datalist>
+    </div>
+  </div>
+</header>
+<main class="wrap main">
+  <section class="pane list-pane" aria-label="Citations"><div class="pane-head"><span id="info">Loading…</span><button type="button" class="link-btn" id="tsv" hidden>TSV</button></div>
+    <ul id="results" class="list">
+      <li class="empty">
+        <h2>How to search</h2>
+        <ul>
+          <li>Absorb period spellings: <a href="#" data-try="ᄆᆞᅀᆞᆷ|era" class="hangul">ᄆᆞᅀᆞᆷ</a> (also <span class="hangul">ᄆᆞᅀᆞᄆᆞᆯ, ᄆᆞᅀᆞᆷᄋᆞᆯ</span> and 17th-century <span class="hangul">ᄆᆞ음</span>)</li>
+          <li>Consecutive words: <a href="#" data-try="ᄆᆞᅀᆞᆷ 내|era" class="hangul">ᄆᆞᅀᆞᆷ 내</a> (each word contains the query word)</li>
+          <li>Start or end of a word: <a href="#" data-try="^니ᄅᆞ|exact" class="hangul">^니ᄅᆞ</a>, <a href="#" data-try="ᄋᆞ로$|exact" class="hangul">ᄋᆞ로$</a></li>
+          <li>Regular expressions: <a href="#" data-try="ᄒᆞ(시|샤)ᄃᆡ|re" class="hangul">ᄒᆞ(시|샤)ᄃᆡ</a></li>
+        </ul>
+        <p class="muted">The citations are those quoted in the historical information of <span class="hangul">우리말샘</span> (National Institute of Korean Language); identical sentences are merged. Underlined: the form that <span class="hangul">우리말샘</span> assigns to the entry. Highlighted: your match. Click a form to open its entry.</p>
+        <p class="muted">“Absorb period spellings” treats letters and spellings that were no longer distinguished in the century of each citation as the same (the same rules as the main search, after Lee &amp; Ramsey 2011, ch. 6). Tone dots are ignored.</p>
+      </li>
+    </ul>
+  </section>
+  <section class="pane detail-pane" aria-label="Distribution"><div id="side"></div></section>
+</main>
+<footer class="wrap foot">
+  <a href="https://github.com/anti-tail/LexicaCoreanicaSelecta/blob/main/CONTRIBUTING.md#english" rel="noopener">Report and fix errors</a>
+  <span>Citations and sources: <a href="https://opendict.korean.go.kr/" rel="noopener">우리말샘</a> (National Institute of Korean Language, CC BY-SA 2.0 KR). See <a href="LICENSE.md">LICENSE.md</a></span>
+</footer>
+<script src="../hkey.js"></script>
+<script src="../hangulkbd.js"></script>
+<script src="../corpus.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # 日本語で中期朝鮮語・方言を引く — Lexica Coreanica Selecta
 
-**English:** Middle Korean and Korean dialects in English is at [`en/`](en/) (same data, English interface and English translations; the “Dialects” tab searches modern dialect forms by form, meaning or region on a map). Corrections: [CONTRIBUTING.md](CONTRIBUTING.md#english).
+**English:** Middle Korean and Korean dialects in English is at [`en/`](en/) (same data, English interface and English translations; the “Citations” page searches the citations in full text; the “Dialects” tab searches modern dialect forms by form, meaning or region on a map). Corrections: [CONTRIBUTING.md](CONTRIBUTING.md#english).
 
 15–19 世紀の朝鮮語の形と用例，現代の方言形を引く検索ページです．ブラウザだけで動きます．
 
@@ -11,6 +11,8 @@
 - 「方言」タブでは 우리말샘 の方言項目（約 2.6 万語群・11 万形）を，方言形・意味（日本語訳・英語訳・現代語の見出しと語釈）・地図で選んだ地域で引けます．
   地域は「どれかに出る」「すべてに出る」「そこにだけ出る」で絞れ，語を入れずに地域だけ選ぶとその地域の方言形を一覧にします．
   語群を開くと，同じ意味の別の地域の形が地図と地域ごとの表に並び，同じ訳を持つ別の語群や中期・近世の形へ辿れます．
+- 「用例」（[`corpus.html`](corpus.html)）では，우리말샘 の歴史情報に引かれた用例（約 3 万文）を全文で引けます．照合は「時代ごとの綴りの揺れを吸収」「音節の組み方だけ吸収」「表記どおり」「正規表現」から選べ，空白で区切ると続く語節で探します．
+  世紀・文献で絞り，世紀・文献ごとの数と一致した語節の内訳を示し，結果を TSV で書き出せます．形を押すとその項目へ移ります．
 - 옛한글 を表示する書体（Noto Serif CJK KR の部分集合，SIL OFL）を埋め込んでいるので，スマートフォンでも読めます．
 - 英語版（英語の画面，한국어기초사전 の英語訳で引く）は [`en/`](en/) にあります．
 - 訳や形の対応付けの誤りは，項目の下の「誤りを報告」から Issue で知らせてください．協力者は `corrections/translations.tsv` に 1 行足して直します（手順は [CONTRIBUTING.md](CONTRIBUTING.md)）．

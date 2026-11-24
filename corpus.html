@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>用例を全文で引く — Lexica Coreanica Selecta</title>
+<meta name="description" content="우리말샘（国立国語院）の歴史情報に引かれた 15–19 世紀の朝鮮語の用例を，綴りの揺れを吸収して全文で引く．">
+<link rel="preload" href="fonts/hangul.woff" as="font" type="font/woff" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="corpus.css">
+<link rel="alternate" hreflang="en" href="en/corpus.html">
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-row">
+    <div class="mark"><span class="mark-title">Lexica Coreanica <span class="mark-selecta">Selecta</span></span><span class="mark-sub">日本語で中期朝鮮語・方言を引く</span></div>
+    <span class="top-links"><a href="en/corpus.html" hreflang="en" lang="en">English</a><button type="button" class="link-btn" id="theme">暗い表示にする</button></span>
+  </div>
+  <div class="wrap">
+    <nav class="tabs" aria-label="引く資料">
+      <a class="tab-link" href="index.html">中期・近世の形<span class="tab-sub">15–19 世紀</span></a>
+      <a class="tab-link" href="index.html#t=d">方言<span class="tab-sub">地図・同じ意味の形</span></a>
+      <a class="tab-link" href="corpus.html" aria-selected="true">用例<span class="tab-sub">文を全文で</span></a>
+    </nav>
+    <form id="f" class="query" autocomplete="off" role="search">
+      <input id="q" class="field big" type="search" placeholder="ᄆᆞᅀᆞᆷ　사ᄅᆞᆷ　^니ᄅᆞ" aria-label="語を入れる" autofocus>
+      <button class="btn" type="submit">引く</button>
+    </form>
+    <div class="cq-ctl">
+      <span class="label">照合</span>
+      <select id="mode" class="mode" aria-label="照合のしかた">
+        <option value="era" selected>時代ごとの綴りの揺れを吸収</option>
+        <option value="syl">音節の組み方だけ吸収</option>
+        <option value="exact">表記どおり</option>
+        <option value="re">正規表現</option>
+      </select>
+      <span class="label sep">時代</span>
+      <span id="cents">
+        <label><input type="checkbox" value="15" checked> 15 世紀</label>
+        <label><input type="checkbox" value="16" checked> 16 世紀</label>
+        <label><input type="checkbox" value="17" checked> 17 世紀</label>
+        <label><input type="checkbox" value="18" checked> 18 世紀</label>
+        <label><input type="checkbox" value="19" checked> 19 世紀</label>
+      </span>
+      <span class="label sep">文献</span><input id="doc" class="doc" list="doclist" placeholder="석상　번노" aria-label="文献の略号で絞る"><datalist id="doclist"></datalist>
+    </div>
+  </div>
+</header>
+<main class="wrap main">
+  <section class="pane list-pane" aria-label="用例"><div class="pane-head"><span id="info">読み込み中…</span><button type="button" class="link-btn" id="tsv" hidden>TSV</button></div>
+    <ul id="results" class="list">
+      <li class="empty">
+        <h2>使い方</h2>
+        <ul>
+          <li>綴りの揺れを吸収して引く：<a href="#" data-try="ᄆᆞᅀᆞᆷ|era" class="hangul">ᄆᆞᅀᆞᆷ</a>（<span class="hangul">ᄆᆞᅀᆞᄆᆞᆯ・ᄆᆞᅀᆞᆷᄋᆞᆯ</span>，17 世紀以降の <span class="hangul">ᄆᆞ음</span> も）</li>
+          <li>続く語節で引く：<a href="#" data-try="ᄆᆞᅀᆞᆷ 내|era" class="hangul">ᄆᆞᅀᆞᆷ 내</a>（それぞれの語節が問いの語を含むもの）</li>
+          <li>語節の頭・末：<a href="#" data-try="^니ᄅᆞ|exact" class="hangul">^니ᄅᆞ</a>，<a href="#" data-try="ᄋᆞ로$|exact" class="hangul">ᄋᆞ로$</a></li>
+          <li>正規表現：<a href="#" data-try="ᄒᆞ(시|샤)ᄃᆡ|re" class="hangul">ᄒᆞ(시|샤)ᄃᆡ</a></li>
+        </ul>
+        <p class="muted">用例は <span class="hangul">우리말샘</span>（国立国語院）の歴史情報に引かれたもので，同じ文を 1 件にまとめてあります．下線は <span class="hangul">우리말샘</span> がその項目の形とした部分，色の付いた部分が検索の一致です．形を押すと項目へ移ります．</p>
+        <p class="muted">「時代ごとの綴りの揺れを吸収」は，用例の世紀にすでに区別されなくなった字母や綴りを同じものとみなします（検索ページと同じ規則．Lee &amp; Ramsey 2011 の 6 章による）．傍点は無視します．</p>
+      </li>
+    </ul>
+  </section>
+  <section class="pane detail-pane" aria-label="分布"><div id="side"></div></section>
+</main>
+<footer class="wrap foot">
+  <a href="https://github.com/anti-tail/LexicaCoreanicaSelecta/blob/main/CONTRIBUTING.md#日本語" rel="noopener">誤りの報告と訂正</a>
+  <span>用例・出典：<a href="https://opendict.korean.go.kr/" rel="noopener">우리말샘</a>（国立国語院，CC BY-SA 2.0 KR）．詳しくは <a href="LICENSE.md">LICENSE.md</a></span>
+</footer>
+<script src="hkey.js"></script>
+<script src="hangulkbd.js"></script>
+<script src="corpus.js"></script>
+</body>
+</html>

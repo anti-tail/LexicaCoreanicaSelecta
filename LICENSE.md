@@ -9,6 +9,7 @@
 
 - 方言地図の輪郭は Natural Earth（パブリックドメイン，<https://www.naturalearthdata.com/>）を簡略化したもの．地域の代表地点は Lexica Coreanica で定めたもので，原資料にはありません．
 - 方言の「語群」（同じ現代語に結ばれた方言項目のまとまり．結ばれていない項目は語釈と品詞の同じもの）と，地域名の日本語・英語の表記は Lexica Coreanica でまとめたもので，原資料にはありません．
+- 「用例」のページ（`corpus.html`）は，우리말샘 の歴史情報に引かれた用例を，同じ文を 1 件にまとめて全文で引けるようにしたものです（`data/u/cites.json`）．照合キー（綴りの揺れの吸収）は Lexica Coreanica のプログラムで作ったもので，原資料にはありません．
 - 表記の分節化と Yale 綴り（参考）は Lexica Coreanica のプログラムで機械的に作ったもので，原資料にはありません．
 - このサイトのデータ（`data/`）も CC BY-SA 2.0 KR で提供します（同一条件許諾）．利用するときは上の出典を表示してください．
   許諾の全文：<https://creativecommons.org/licenses/by-sa/2.0/kr/>
